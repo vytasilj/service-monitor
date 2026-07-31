@@ -6,6 +6,7 @@ public class MonitorResultsStore
 {
     public ObservableCollection<CheckResult> Results { get; } = [];
     public event Action<HealthState>? OverallStateChanged;
+    public event Action? ResultsUpdated;
 
     private HealthState _overallState = HealthState.Unknown;
     public HealthState OverallState
@@ -32,5 +33,7 @@ public class MonitorResultsStore
         // HealthState is declared Unknown < Ok < Warning < Error, so Max() naturally
         // picks the worst state across all results.
         OverallState = results.Count == 0 ? HealthState.Unknown : results.Max(r => r.State);
+
+        ResultsUpdated?.Invoke();
     }
 }

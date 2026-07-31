@@ -7,27 +7,60 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <ListView ItemsSource="{Binding Results}"
-                Margin="10">
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Header="Source"
-                            DisplayMemberBinding="{Binding Source}"
-                            Width="80"/>
-                    <GridViewColumn Header="Name"
-                            DisplayMemberBinding="{Binding Name}"
-                            Width="200"/>
-                    <GridViewColumn Header="State"
-                            DisplayMemberBinding="{Binding State}"
-                            Width="80"/>
-                    <GridViewColumn Header="Detail"
-                            DisplayMemberBinding="{Binding Detail}"
-                            Width="250"/>
-                    <GridViewColumn Header="Checked at"
-                            DisplayMemberBinding="{Binding CheckedAtUtc}"
-                            Width="150"/>
-                </GridView>
-            </ListView.View>
-        </ListView>
-    </Grid>
+                <TabControl Margin="10">
+                        <TabItem Header="Current Status">
+                                <ListView ItemsSource="{Binding Results}">
+                                        <ListView.View>
+                                                <GridView>
+                                                        <GridViewColumn Header="Source"
+                                                                        DisplayMemberBinding="{Binding Source}"
+                                                                        Width="80"/>
+                                                        <GridViewColumn Header="Name"
+                                                                        DisplayMemberBinding="{Binding Name}"
+                                                                        Width="200"/>
+                                                        <GridViewColumn Header="State"
+                                                                        DisplayMemberBinding="{Binding State}"
+                                                                        Width="80"/>
+                                                        <GridViewColumn Header="Detail"
+                                                                        DisplayMemberBinding="{Binding Detail}"
+                                                                        Width="250"/>
+                                                        <GridViewColumn Header="Checked at"
+                                                                        DisplayMemberBinding="{Binding CheckedAtUtc, StringFormat='yyyy-MM-dd HH:mm:ss'}"
+                                                                        Width="150"/>
+                                                </GridView>
+                                        </ListView.View>
+                                </ListView>
+                        </TabItem>
+                        <TabItem Header="History">
+                                <DockPanel>
+                                        <TextBlock DockPanel.Dock="Top"
+                                                        Margin="5"
+                                                   Text="Showing only status changes over time (not every individual check)."
+                                                   FontStyle="Italic"
+                                                        Opacity="0.7"/>
+                                        <ListView ItemsSource="{Binding History}">
+                                                <ListView.View>
+                                                        <GridView>
+                                                                <GridViewColumn Header="Source"
+                                                                                DisplayMemberBinding="{Binding Source}"
+                                                                                Width="80"/>
+                                                                <GridViewColumn Header="Name"
+                                                                                DisplayMemberBinding="{Binding Name}"
+                                                                                Width="200"/>
+                                                                <GridViewColumn Header="State"
+                                                                                DisplayMemberBinding="{Binding State}"
+                                                                                Width="80"/>
+                                                                <GridViewColumn Header="Detail"
+                                                                                DisplayMemberBinding="{Binding Detail}"
+                                                                                Width="250"/>
+                                                                <GridViewColumn Header="Since (UTC)"
+                                                                                DisplayMemberBinding="{Binding OccurredAtUtc, StringFormat='yyyy-MM-dd HH:mm:ss'}"
+                                                                                Width="150"/>
+                                                        </GridView>
+                                                </ListView.View>
+                                        </ListView>
+                                </DockPanel>
+                        </TabItem>
+                </TabControl>
+        </Grid>
 </Window>
