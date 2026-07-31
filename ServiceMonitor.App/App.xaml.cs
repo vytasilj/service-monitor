@@ -3,6 +3,8 @@ using System.Windows;
 using System.Windows.Forms;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using ServiceMonitor.App.Configuration;
+using ServiceMonitor.App.Monitoring;
 using ServiceMonitor.App.ViewModels;
 using Application = System.Windows.Application;
 
@@ -18,12 +20,49 @@ public partial class App : Application
         base.OnStartup(e);
 
         var builder = Host.CreateApplicationBuilder();
+        builder.Services.AddSingleton<ConfigService>();
+        builder.Services.AddSingleton(sp => sp.GetRequiredService<ConfigService>().Load());
         builder.Services.AddSingleton<MainViewModel>();
         builder.Services.AddSingleton<MainWindow>();
+        builder.Services.AddSingleton<KubernetesStatusChecker>();
+        builder.Services.AddHttpClient();
+        builder.Services.AddSingleton<HttpEndpointChecker>();
+        builder.Services.AddSingleton<MonitorResultsStore>();
+        builder.Services.AddHostedService<MonitorBackgroundService>();
+
         _host = builder.Build();
+        _host.Start();
+
+        var store = _host.Services.GetRequiredService<MonitorResultsStore>();
+        store.OverallStateChanged += OnOverallStateChanged;
 
         SetupTrayIcon();
         ShowMainWindow();
+    }
+
+    private void OnOverallStateChanged(HealthState state)
+    {
+        Dispatcher.Invoke(() =>
+        {
+            var iconName = state switch
+            {
+                HealthState.Ok => "status-ok",
+                HealthState.Warning => "status-warn",
+                HealthState.Error => "status-error",
+                _ => "status-unknown"
+            };
+            var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", $"{iconName}.ico");
+
+            var oldIcon = _trayIcon!.Icon;
+            _trayIcon.Icon = new Icon(iconPath);
+            oldIcon?.Dispose();
+
+            if (state is HealthState.Warning or HealthState.Error)
+            {
+                var toolTipIcon = state == HealthState.Error ? ToolTipIcon.Error : ToolTipIcon.Warning;
+                _trayIcon.ShowBalloonTip(5000, "Service Monitor", $"Status changed to {state}", toolTipIcon);
+            }
+        });
     }
 
     private void SetupTrayIcon()
@@ -32,7 +71,7 @@ public partial class App : Application
 
         _trayIcon = new NotifyIcon
         {
-            Icon = new System.Drawing.Icon(iconPath),
+            Icon = new Icon(iconPath),
             Visible = true,
             Text = "Service Monitor"
         };
@@ -62,6 +101,7 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        _host?.StopAsync().GetAwaiter().GetResult();
         _trayIcon?.Dispose();
         _host?.Dispose();
         base.OnExit(e);

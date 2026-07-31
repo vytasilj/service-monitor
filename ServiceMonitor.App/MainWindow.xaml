@@ -7,10 +7,27 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <TextBlock Text="{Binding Greeting}"
-                FontSize="24"
-                Margin="20"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"/>
+        <ListView ItemsSource="{Binding Results}"
+                Margin="10">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Source"
+                            DisplayMemberBinding="{Binding Source}"
+                            Width="80"/>
+                    <GridViewColumn Header="Name"
+                            DisplayMemberBinding="{Binding Name}"
+                            Width="200"/>
+                    <GridViewColumn Header="State"
+                            DisplayMemberBinding="{Binding State}"
+                            Width="80"/>
+                    <GridViewColumn Header="Detail"
+                            DisplayMemberBinding="{Binding Detail}"
+                            Width="250"/>
+                    <GridViewColumn Header="Checked at"
+                            DisplayMemberBinding="{Binding CheckedAtUtc}"
+                            Width="150"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
     </Grid>
 </Window>
