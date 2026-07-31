@@ -6,61 +6,126 @@
         xmlns:local="clr-namespace:ServiceMonitor.App"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
-                <TabControl Margin="10">
+        <DockPanel Margin="10">
+                <StackPanel DockPanel.Dock="Top"
+                                Orientation="Horizontal"
+                                Margin="0,0,0,10">
+                        <TextBlock Text="Filter by name:"
+                                        VerticalAlignment="Center"
+                                        Margin="0,0,5,0"/>
+                        <TextBox Width="180"
+                                        Text="{Binding NameFilter, UpdateSourceTrigger=PropertyChanged}"
+                                        Margin="0,0,20,0"/>
+                        <TextBlock Text="State:"
+                                        VerticalAlignment="Center"
+                                        Margin="0,0,5,0"/>
+                        <ComboBox Width="130"
+                                        ItemsSource="{Binding StateFilterOptions}"
+                                        SelectedItem="{Binding SelectedStateFilter}"
+                                        Margin="0,0,10,0"/>
+                        <Button Content="Clear"
+                                        Command="{Binding ClearFiltersCommand}"
+                                        Padding="10,2"/>
+                </StackPanel>
+
+                <TabControl>
                         <TabItem Header="Current Status">
-                                <ListView ItemsSource="{Binding Results}">
-                                        <ListView.View>
-                                                <GridView>
-                                                        <GridViewColumn Header="Source"
-                                                                        DisplayMemberBinding="{Binding Source}"
-                                                                        Width="80"/>
-                                                        <GridViewColumn Header="Name"
-                                                                        DisplayMemberBinding="{Binding Name}"
-                                                                        Width="200"/>
-                                                        <GridViewColumn Header="State"
-                                                                        DisplayMemberBinding="{Binding State}"
-                                                                        Width="80"/>
-                                                        <GridViewColumn Header="Detail"
-                                                                        DisplayMemberBinding="{Binding Detail}"
-                                                                        Width="250"/>
-                                                        <GridViewColumn Header="Checked at"
-                                                                        DisplayMemberBinding="{Binding CheckedAtUtc, StringFormat='yyyy-MM-dd HH:mm:ss'}"
-                                                                        Width="150"/>
-                                                </GridView>
-                                        </ListView.View>
-                                </ListView>
+                                <DataGrid ItemsSource="{Binding ResultsView}"
+                                                AutoGenerateColumns="False"
+                                                IsReadOnly="True"
+                                          GridLinesVisibility="Horizontal"
+                                                HeadersVisibility="Column">
+                                        <DataGrid.RowStyle>
+                                                <Style TargetType="DataGridRow">
+                                                        <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding State}"
+                                                                                Value="Ok">
+                                                                        <Setter Property="Background"
+                                                                                        Value="#DCFCE7"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding State}"
+                                                                                Value="Warning">
+                                                                        <Setter Property="Background"
+                                                                                        Value="#FEF3C7"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding State}"
+                                                                                Value="Error">
+                                                                        <Setter Property="Background"
+                                                                                        Value="#FEE2E2"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding State}"
+                                                                                Value="Unknown">
+                                                                        <Setter Property="Background"
+                                                                                        Value="#F1F5F9"/>
+                                                                </DataTrigger>
+                                                        </Style.Triggers>
+                                                </Style>
+                                        </DataGrid.RowStyle>
+                                        <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Source"
+                                                                Binding="{Binding Source}"
+                                                                Width="80"/>
+                                                <DataGridTextColumn Header="Name"
+                                                                Binding="{Binding Name}"
+                                                                Width="220"/>
+                                                <DataGridTextColumn Header="State"
+                                                                Binding="{Binding State}"
+                                                                Width="80"/>
+                                                <DataGridTextColumn Header="Detail"
+                                                                Binding="{Binding Detail}"
+                                                                Width="260"/>
+                                                <DataGridTextColumn Header="Checked at"
+                                                                Binding="{Binding CheckedAtUtc, StringFormat='yyyy-MM-dd HH:mm:ss'}"
+                                                                Width="150"/>
+                                        </DataGrid.Columns>
+                                </DataGrid>
                         </TabItem>
                         <TabItem Header="History">
-                                <DockPanel>
-                                        <TextBlock DockPanel.Dock="Top"
-                                                        Margin="5"
-                                                   Text="Showing only status changes over time (not every individual check)."
-                                                   FontStyle="Italic"
-                                                        Opacity="0.7"/>
-                                        <ListView ItemsSource="{Binding History}">
-                                                <ListView.View>
-                                                        <GridView>
-                                                                <GridViewColumn Header="Source"
-                                                                                DisplayMemberBinding="{Binding Source}"
-                                                                                Width="80"/>
-                                                                <GridViewColumn Header="Name"
-                                                                                DisplayMemberBinding="{Binding Name}"
-                                                                                Width="200"/>
-                                                                <GridViewColumn Header="State"
-                                                                                DisplayMemberBinding="{Binding State}"
-                                                                                Width="80"/>
-                                                                <GridViewColumn Header="Detail"
-                                                                                DisplayMemberBinding="{Binding Detail}"
-                                                                                Width="250"/>
-                                                                <GridViewColumn Header="Since (UTC)"
-                                                                                DisplayMemberBinding="{Binding OccurredAtUtc, StringFormat='yyyy-MM-dd HH:mm:ss'}"
-                                                                                Width="150"/>
-                                                        </GridView>
-                                                </ListView.View>
-                                        </ListView>
-                                </DockPanel>
+                                <DataGrid ItemsSource="{Binding HistoryView}"
+                                                AutoGenerateColumns="False"
+                                                IsReadOnly="True"
+                                          GridLinesVisibility="Horizontal"
+                                                HeadersVisibility="Column">
+                                        <DataGrid.RowStyle>
+                                                <Style TargetType="DataGridRow">
+                                                        <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding State}"
+                                                                                Value="Ok">
+                                                                        <Setter Property="Background"
+                                                                                        Value="#DCFCE7"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding State}"
+                                                                                Value="Warning">
+                                                                        <Setter Property="Background"
+                                                                                        Value="#FEF3C7"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding State}"
+                                                                                Value="Error">
+                                                                        <Setter Property="Background"
+                                                                                        Value="#FEE2E2"/>
+                                                                </DataTrigger>
+                                                        </Style.Triggers>
+                                                </Style>
+                                        </DataGrid.RowStyle>
+                                        <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Source"
+                                                                Binding="{Binding Source}"
+                                                                Width="80"/>
+                                                <DataGridTextColumn Header="Name"
+                                                                Binding="{Binding Name}"
+                                                                Width="220"/>
+                                                <DataGridTextColumn Header="State"
+                                                                Binding="{Binding State}"
+                                                                Width="80"/>
+                                                <DataGridTextColumn Header="Detail"
+                                                                Binding="{Binding Detail}"
+                                                                Width="260"/>
+                                                <DataGridTextColumn Header="Since (UTC)"
+                                                                Binding="{Binding OccurredAtUtc, StringFormat='yyyy-MM-dd HH:mm:ss'}"
+                                                                Width="150"/>
+                                        </DataGrid.Columns>
+                                </DataGrid>
                         </TabItem>
                 </TabControl>
-        </Grid>
+        </DockPanel>
 </Window>
