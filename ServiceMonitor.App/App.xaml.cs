@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Windows;
 using System.Windows.Forms;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ServiceMonitor.App.Configuration;
@@ -30,7 +31,24 @@ public partial class App : Application
         builder.Services.AddSingleton<MonitorResultsStore>();
         builder.Services.AddHostedService<MonitorBackgroundService>();
 
+        var dbPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "ServiceMonitor", "history.db");
+        Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
+
+        builder.Services.AddDbContextFactory<MonitorDbContext>(options =>
+            options.UseSqlite($"Data Source={dbPath}"));
+        builder.Services.AddSingleton<HistoryService>();
+
         _host = builder.Build();
+
+        using (var scope = _host.Services.CreateScope())
+        {
+            var dbFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<MonitorDbContext>>();
+            using var db = dbFactory.CreateDbContext();
+            db.Database.Migrate();
+        }
+
         _host.Start();
 
         var store = _host.Services.GetRequiredService<MonitorResultsStore>();

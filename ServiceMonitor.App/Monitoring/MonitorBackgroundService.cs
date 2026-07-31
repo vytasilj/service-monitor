@@ -7,7 +7,8 @@ public class MonitorBackgroundService(
     MonitorConfig config,
     KubernetesStatusChecker k8sChecker,
     HttpEndpointChecker httpChecker,
-    MonitorResultsStore store) : BackgroundService
+    MonitorResultsStore store,
+    HistoryService historyService) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -27,5 +28,6 @@ public class MonitorBackgroundService(
         results.AddRange(await k8sChecker.CheckAsync(cancellationToken));
         results.AddRange(await httpChecker.CheckAsync(cancellationToken));
         store.UpdateResults(results);
+        await historyService.RecordAsync(results, cancellationToken);
     }
 }
