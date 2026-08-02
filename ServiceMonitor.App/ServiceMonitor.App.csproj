@@ -7,12 +7,23 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>Assets\app-icon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Overrides WPF's auto-generated Main(), so Velopack can initialize before the app starts -->
+    <StartupObject>ServiceMonitor.App.App</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="Assets\*.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ApplicationDefinition Remove="App.xaml" />
+    <Page Include="App.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,5 +37,6 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.10" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.10" />
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.5" />
+    <PackageReference Include="Velopack" Version="1.2.0" />
   </ItemGroup>
 </Project>
