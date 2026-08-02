@@ -17,10 +17,29 @@ public partial class App : Application
 {
     private IHost? _host;
     private NotifyIcon? _trayIcon;
+    private Mutex? _singleInstanceMutex;
 
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        _singleInstanceMutex = new Mutex(true, "ServiceMonitor-SingleInstance-Mutex", out var isNewInstance);
+        if (!isNewInstance)
+        {
+            System.Windows.MessageBox.Show(
+                "Service Monitor is already running — check your system tray.",
+                "Service Monitor",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+
+            // This thread never acquired ownership of the mutex (another instance did),
+            // so we must not call ReleaseMutex() on it later in OnExit — just dispose it.
+            _singleInstanceMutex.Dispose();
+            _singleInstanceMutex = null;
+
+            Shutdown();
+            return;
+        }
 
         var builder = Host.CreateApplicationBuilder();
         builder.Services.AddSingleton<ConfigService>();
@@ -127,6 +146,8 @@ public partial class App : Application
         _host?.StopAsync().GetAwaiter().GetResult();
         _trayIcon?.Dispose();
         _host?.Dispose();
+        _singleInstanceMutex?.ReleaseMutex();
+        _singleInstanceMutex?.Dispose();
         base.OnExit(e);
     }
 
