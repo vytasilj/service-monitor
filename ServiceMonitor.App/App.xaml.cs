@@ -6,7 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ServiceMonitor.App.Configuration;
 using ServiceMonitor.App.Monitoring;
+using ServiceMonitor.App.Updates;
 using ServiceMonitor.App.ViewModels;
+using Velopack;
 using Application = System.Windows.Application;
 
 namespace ServiceMonitor.App;
@@ -39,6 +41,9 @@ public partial class App : Application
         builder.Services.AddDbContextFactory<MonitorDbContext>(options =>
             options.UseSqlite($"Data Source={dbPath}"));
         builder.Services.AddSingleton<HistoryService>();
+
+        builder.Services.AddSingleton(new UpdateService("https://github.com/vytasilj/service-monitor"));
+        builder.Services.AddHostedService<UpdateCheckBackgroundService>();
 
         _host = builder.Build();
 
@@ -123,5 +128,24 @@ public partial class App : Application
         _trayIcon?.Dispose();
         _host?.Dispose();
         base.OnExit(e);
+    }
+
+    [STAThread]
+    private static void Main(string[] args)
+    {
+        try
+        {
+            // Must run before anything else — this is what lets Velopack manage
+            // installation, shortcuts, and (later) updates for this app.
+            VelopackApp.Build().Run();
+
+            var app = new App();
+            app.InitializeComponent();
+            app.Run();
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show("Unhandled startup exception: " + ex);
+        }
     }
 }
