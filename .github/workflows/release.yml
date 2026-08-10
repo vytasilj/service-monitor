@@ -39,7 +39,7 @@ jobs:
         run: dotnet publish ServiceMonitor.App/ServiceMonitor.App.csproj -c Release -o publish
 
       - name: Pack
-        run: vpk pack -u ServiceMonitor -v ${{ steps.version.outputs.version }} -o releases -p publish -f net10-x64-desktop -e ServiceMonitor.App.exe -i ServiceMonitor.App/Assets/app-icon.ico --packTitle "Service Monitor" --packAuthors "Tvoje Jméno"
+        run: vpk pack -u ServiceMonitor -v ${{ steps.version.outputs.version }} -o releases -p publish -f net10-x64-desktop -e ServiceMonitor.App.exe -i ServiceMonitor.App/Assets/app-icon.ico --packTitle "Service Monitor" --packAuthors "Jiří Vytasil"
 
       - name: Upload to GitHub Releases
         run: vpk upload github -o releases --repoUrl https://github.com/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }} --publish --tag ${{ github.ref_name }}
