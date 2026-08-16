@@ -8,4 +8,5 @@ public class StatusHistoryEntry
     public HealthState State { get; set; }
     public string? Detail { get; set; }
     public DateTime OccurredAtUtc { get; set; }
+    public DateTime OccurredAtLocal => OccurredAtUtc.ToLocalTime();
 }
