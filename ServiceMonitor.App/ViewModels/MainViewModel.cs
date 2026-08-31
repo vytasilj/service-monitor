@@ -4,12 +4,14 @@ using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ServiceMonitor.App.Monitoring;
+using ServiceMonitor.App.Services;
 
 namespace ServiceMonitor.App.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
     private readonly HistoryService _historyService;
+    private readonly IStartupService _startupService;
     private readonly ICollectionView _resultsView;
     private readonly ICollectionView _historyView;
 
@@ -28,9 +30,15 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private HealthState? _selectedStateFilter;
 
-    public MainViewModel(MonitorResultsStore store, HistoryService historyService)
+    [ObservableProperty]
+    private bool _startOnLogin;
+
+    public MainViewModel(MonitorResultsStore store, HistoryService historyService, IStartupService startupService)
     {
         _historyService = historyService;
+        _startupService = startupService;
+        _startOnLogin = _startupService.IsRunAtStartupEnabled();
+
         Results = store.Results;
         store.ResultsUpdated += OnResultsUpdated;
 
@@ -55,6 +63,11 @@ public partial class MainViewModel : ObservableObject
         _historyView.Refresh();
     }
 
+    partial void OnStartOnLoginChanged(bool value)
+    {
+        _startupService.SetRunAtStartup(value);
+    }
+
     [RelayCommand]
     private void ClearFilters()
     {
@@ -68,11 +81,20 @@ public partial class MainViewModel : ObservableObject
     {
         var entries = await _historyService.GetRecentAsync(200);
 
-        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+        void UpdateHistory()
         {
             History.Clear();
             foreach (var entry in entries) History.Add(entry);
             _historyView.Refresh();
-        });
+        }
+
+        if (System.Windows.Application.Current?.Dispatcher is { } dispatcher)
+        {
+            dispatcher.Invoke(UpdateHistory);
+        }
+        else
+        {
+            UpdateHistory();
+        }
     }
 }
