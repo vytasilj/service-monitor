@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ServiceMonitor.App.Configuration;
 using ServiceMonitor.App.Monitoring;
+using ServiceMonitor.App.Services;
 using ServiceMonitor.App.Updates;
 using ServiceMonitor.App.ViewModels;
 using Velopack;
@@ -44,6 +45,7 @@ public partial class App : Application
         var builder = Host.CreateApplicationBuilder();
         builder.Services.AddSingleton<ConfigService>();
         builder.Services.AddSingleton(sp => sp.GetRequiredService<ConfigService>().Load());
+        builder.Services.AddSingleton<IStartupService, WindowsStartupService>();
         builder.Services.AddSingleton<MainViewModel>();
         builder.Services.AddSingleton<MainWindow>();
         builder.Services.AddSingleton<KubernetesStatusChecker>();
